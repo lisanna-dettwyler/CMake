@@ -48,13 +48,20 @@ Since PNG depends on the ZLib compression library, none of the above
 will be defined unless ZLib can be found.
 #]=======================================================================]
 
+# Default install location on windows when installing from included cmake build
+# From FindZLIB.cmake
+set(_PNG_SEARCH_NORMAL
+    PATHS "$ENV{ProgramFiles}/libpng"
+          "$ENV{ProgramFiles(x86)}/libpng")
+list(APPEND _PNG_SEARCHES _PNG_SEARCH_NORMAL)
+
 if(PNG_FIND_QUIETLY)
   set(_FIND_ZLIB_ARG QUIET)
 endif()
 find_package(ZLIB ${_FIND_ZLIB_ARG})
 
 if(ZLIB_FOUND)
-  find_path(PNG_PNG_INCLUDE_DIR png.h PATH_SUFFIXES include/libpng)
+  find_path(PNG_PNG_INCLUDE_DIR png.h PATH_SUFFIXES include/libpng PATHS ${_PNG_SEARCHES} )
   mark_as_advanced(PNG_PNG_INCLUDE_DIR)
 
   list(APPEND PNG_NAMES png libpng)
@@ -79,8 +86,8 @@ if(ZLIB_FOUND)
   # For compatibility with versions prior to this multi-config search, honor
   # any PNG_LIBRARY that is already specified and skip the search.
   if(NOT PNG_LIBRARY)
-    find_library(PNG_LIBRARY_RELEASE NAMES ${PNG_NAMES} NAMES_PER_DIR)
-    find_library(PNG_LIBRARY_DEBUG NAMES ${PNG_NAMES_DEBUG} NAMES_PER_DIR)
+    find_library(PNG_LIBRARY_RELEASE NAMES ${PNG_NAMES} NAMES_PER_DIR PATHS ${_PNG_SEARCHES})
+    find_library(PNG_LIBRARY_DEBUG NAMES ${PNG_NAMES_DEBUG} NAMES_PER_DIR PATHS ${_PNG_SEARCHES})
     include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
     select_library_configurations(PNG)
     mark_as_advanced(PNG_LIBRARY_RELEASE PNG_LIBRARY_DEBUG)
